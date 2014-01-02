@@ -1,4 +1,27 @@
 #!/opt/sensu/embedded/bin/ruby
+# Check SNMP switch metrics
+# ===
+#
+# This walks a switch and returns all data from 4 columns
+# "ifIndex", "ifDescr", "ifInOctets", "ifOutOctets"
+#
+#
+# Requires SNMP gem
+#
+# On your cisco switch: 
+#
+#   snmp-server community public RO
+#
+# Examples:
+#
+#   snmp_switch_metrics -H host -c community
+#
+#
+#  Author Jeff Roberts <jeff.roberts@nastygal.com>
+#
+# Released under the same terms as Sensu (the MIT license); see LICENSE
+# for details.
+
 require 'snmp'
 require 'sensu-plugin/metric/cli'
 
@@ -7,7 +30,19 @@ class SwitchMetrics < Sensu::Plugin::Metric::CLI::Graphite
     :short => "-H HOST",
     :long => "--host HOST",
     :description => "HOST to get metrics from",
-    :default => "localhost"
+    :required => true
+
+  option :port,
+    :short => "-P PORT",
+    :long => "--port PORT",
+    :description => "PORT to connect to",
+    :default => "161"
+
+  option :community,
+    :description => "Community name to use",
+    :short => "-c NAME",
+    :long => "--community NAME",
+    :default => "public"
 
   option :scheme,
     :description => "Metric naming scheme",
@@ -25,7 +60,10 @@ class SwitchMetrics < Sensu::Plugin::Metric::CLI::Graphite
 
   def walk(host,scheme)
     ifTable_columns = ["ifIndex", "ifDescr", "ifInOctets", "ifOutOctets"]
-    SNMP::Manager.open(:host => host) do |manager|
+    SNMP::Manager.open(:host => host, 
+                       :port => config[:port], 
+                       :community => config[:community]
+                      ) do |manager|
       a = []
       manager.walk(ifTable_columns) do |row|
         a2 = []
