@@ -17,7 +17,7 @@
 #   snmp_switch_metrics -H host -c community
 #
 #
-#  Author Jeff Roberts <jeff.roberts@nastygal.com>
+#  Author Jeff Roberts <jroberts@yeehaaa.com>
 #
 # Released under the same terms as Sensu (the MIT license); see LICENSE
 # for details.
